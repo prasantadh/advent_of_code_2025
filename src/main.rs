@@ -27,6 +27,8 @@ fn solution_factory(day: u8, part: u8) -> Box<dyn Solution> {
         (2, 2) => Box::new(crate::solution::day2::Part2),
         (3, 1) => Box::new(crate::solution::day3::Part1),
         (3, 2) => Box::new(crate::solution::day3::Part2),
+        (4, 1) => Box::new(crate::solution::day4::Part1),
+        (4, 2) => Box::new(crate::solution::day4::Part2),
         _ => panic!("Not yet implemented!"),
     }
 }
