@@ -41,10 +41,10 @@ impl Solution for Part2 {
 }
 
 fn read_input(filename: &str) -> Vec<Action> {
-    let actions = fs::read_to_string(filename)
-        .expect(format!("Should have been able to read {} as input file", filename).as_str());
-    let actions = actions.trim().split("\n");
-    actions
+    fs::read_to_string(filename)
+        .expect(format!("Should have been able to read {} as input file", filename).as_str())
+        .trim()
+        .split("\n")
         .filter_map(|action| match action.trim().chars().nth(0) {
             Some(v) => Some(Action {
                 direction: if v == 'L' { -1 } else { 1 },
