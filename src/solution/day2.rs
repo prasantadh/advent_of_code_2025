@@ -56,10 +56,10 @@ impl Solution for Part2 {
 }
 
 fn read_input(filename: &str) -> Vec<(u64, u64)> {
-    let ranges = fs::read_to_string(filename)
-        .expect(format!("Should have been able to read {} as input file", filename).as_str());
-    let ranges = ranges.trim().split(",");
-    ranges
+    fs::read_to_string(filename)
+        .expect(format!("Should have been able to read {} as input file", filename).as_str())
+        .trim()
+        .split(",")
         .filter_map(|range| {
             let mut range = range.split("-");
             let lower = range.next()?.parse::<u64>().ok()?;
