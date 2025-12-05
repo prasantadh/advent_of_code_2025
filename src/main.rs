@@ -1,4 +1,5 @@
 pub mod solution;
+use paste::paste;
 
 use clap::{Parser, command};
 
@@ -19,21 +20,20 @@ pub trait Solution {
     fn solve(&self, filename: &str) -> i64;
 }
 
-fn solution_factory(day: u8, part: u8) -> Box<dyn Solution> {
-    match (day, part) {
-        (1, 1) => Box::new(crate::solution::day1::Part1),
-        (1, 2) => Box::new(crate::solution::day1::Part2),
-        (2, 1) => Box::new(crate::solution::day2::Part1),
-        (2, 2) => Box::new(crate::solution::day2::Part2),
-        (3, 1) => Box::new(crate::solution::day3::Part1),
-        (3, 2) => Box::new(crate::solution::day3::Part2),
-        (4, 1) => Box::new(crate::solution::day4::Part1),
-        (4, 2) => Box::new(crate::solution::day4::Part2),
-        (5, 1) => Box::new(crate::solution::day5::Part1),
-        (5, 2) => Box::new(crate::solution::day5::Part2),
-        _ => panic!("Not yet implemented!"),
-    }
+macro_rules! solution_factory {
+    ( $($day:literal),+ $(,)? ) => {
+        fn solution_factory(day: u8, part: u8) -> Box<dyn Solution> {
+            match (day, part) {
+                $(
+                    ($day,1) => Box::new(paste! {crate::solution::[<day $day>]::Part1}),
+                    ($day,2) => Box::new(paste! {crate::solution::[<day $day>]::Part2}),
+                )+
+                _ => panic!("Not yeet implemented"),
+            }
+        }
+    };
 }
+solution_factory!(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
 
 fn main() {
     let args = Args::parse();
