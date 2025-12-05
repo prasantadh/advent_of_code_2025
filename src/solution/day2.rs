@@ -7,23 +7,17 @@ pub struct Part2;
 
 impl Solution for Part1 {
     fn solve(&self, filename: &str) -> i64 {
-        let ranges = fs::read_to_string(filename)
-            .expect(format!("Should have been able to read {} as input file", filename).as_str());
-        let ranges = ranges.trim().split(",");
-
-        let mut answer: i64 = 0;
+        let ranges = read_input(filename);
+        let mut answer = 0;
         for range in ranges {
-            let range: Vec<&str> = range.trim().split('-').collect();
-            let lower = range[0].parse::<i64>().unwrap();
-            let upper = range[1].parse::<i64>().unwrap();
-            for i in lower..=upper {
+            for i in range.0..=range.1 {
                 let s = i.to_string();
                 if s[0..(s.len() / 2)] == s[(s.len() / 2)..] {
                     answer += i
                 }
             }
         }
-        return answer;
+        answer as i64
     }
 }
 
@@ -42,26 +36,35 @@ fn has_repetition(candidate: u64, size: usize) -> bool {
 
 impl Solution for Part2 {
     fn solve(&self, filename: &str) -> i64 {
-        let ranges = fs::read_to_string(filename)
-            .expect(format!("Should have been able to read {} as input file", filename).as_str());
-        let ranges = ranges.trim().split(",");
+        let ranges = read_input(filename);
 
-        let mut answer: i64 = 0;
-        let mut numbers: HashSet<i64> = HashSet::new();
+        let mut answer: u64 = 0;
+        let mut numbers: HashSet<u64> = HashSet::new();
+        // TODO: See if there is a better algorithm for this
         for range in ranges {
-            let range: Vec<&str> = range.trim().split('-').collect();
-            let lower = range[0].parse::<i64>().unwrap();
-            let upper = range[1].parse::<i64>().unwrap();
-            for i in lower..=upper {
+            for i in range.0..=range.1 {
                 for j in 1..=(i.to_string().len() / 2) {
-                    if !numbers.contains(&i) && has_repetition(i as u64, j) {
-                        //println!("{} {}", i, j);
+                    if !numbers.contains(&i) && has_repetition(i, j) {
                         numbers.insert(i);
                         answer += i;
                     }
                 }
             }
         }
-        return answer; // substrings of all sizes should be different
+        answer as i64 // substrings of all sizes should be different
     }
+}
+
+fn read_input(filename: &str) -> Vec<(u64, u64)> {
+    let ranges = fs::read_to_string(filename)
+        .expect(format!("Should have been able to read {} as input file", filename).as_str());
+    let ranges = ranges.trim().split(",");
+    ranges
+        .filter_map(|range| {
+            let mut range = range.split("-");
+            let lower = range.next()?.parse::<u64>().ok()?;
+            let upper = range.next()?.parse::<u64>().ok()?;
+            Some((lower, upper))
+        })
+        .collect()
 }
