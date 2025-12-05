@@ -16,35 +16,28 @@ const DIRECTIONS: [(isize, isize); 8] = [
     (-1, -1),
 ];
 
+fn neighbors_count(rows: &Vec<Vec<bool>>, r: usize, c: usize) -> usize {
+    DIRECTIONS
+        .iter()
+        .filter_map(|v| {
+            let r = r.checked_add_signed(v.0)?;
+            let c = c.checked_add_signed(v.1)?;
+            if r >= rows.len() || c >= rows[0].len() || !rows[r][c] {
+                return None;
+            }
+            Some(rows[r][c])
+        })
+        .count()
+}
+
 impl Solution for Part1 {
     fn solve(&self, filename: &str) -> i64 {
-        let rows: Vec<Vec<bool>> = fs::read_to_string(filename)
-            .expect("Should have been able to read day1.txt as input file")
-            .trim()
-            .split("\n")
-            .map(|v| v.chars().map(|v| v == '@').collect())
-            .collect();
-
+        let rows = read_input(filename);
         let mut answer = 0;
         for (r, row) in rows.iter().enumerate() {
             for (c, roll) in row.iter().enumerate() {
                 // count the number of rolls around by mapping directions into neighbor
-                if *roll
-                    && DIRECTIONS
-                        .iter()
-                        .map(|v| {
-                            let r = r.checked_add_signed(v.0)?;
-                            let c = c.checked_add_signed(v.1)?;
-                            if r >= rows.len() || c >= rows[0].len() {
-                                return None;
-                            }
-                            Some(rows[r][c])
-                        })
-                        .filter_map(|v| v)
-                        .filter(|v| *v)
-                        .count()
-                        < 4
-                {
+                if *roll && neighbors_count(&rows, r, c) < 4 {
                     answer += 1;
                 };
             }
@@ -60,50 +53,35 @@ impl Solution for Part2 {
      * until there is a round where there are no more to remove
      */
     fn solve(&self, filename: &str) -> i64 {
-        let mut rows: Vec<Vec<bool>> = fs::read_to_string(filename)
-            .expect("Should have been able to read day1.txt as input file")
-            .trim()
-            .split("\n")
-            .map(|v| v.chars().map(|v| v == '@').collect())
-            .collect();
-
+        let mut rows = read_input(filename);
         let mut answer = 0;
         loop {
             let mut eliminations: Vec<(usize, usize)> = vec![];
-            let mut delta = 0;
             for (r, row) in rows.iter().enumerate() {
                 for (c, roll) in row.iter().enumerate() {
-                    // count the number of rolls around by mapping directions into neighbor
-                    if *roll
-                        && DIRECTIONS
-                            .iter()
-                            .map(|v| {
-                                let r = r.checked_add_signed(v.0)?;
-                                let c = c.checked_add_signed(v.1)?;
-                                if r >= rows.len() || c >= rows[0].len() {
-                                    return None;
-                                }
-                                Some(rows[r][c])
-                            })
-                            .filter_map(|v| v)
-                            .filter(|v| *v)
-                            .count()
-                            < 4
-                    {
+                    if *roll && neighbors_count(&rows, r, c) < 4 {
                         eliminations.push((r, c));
-                        delta += 1;
                     };
                 }
             }
 
-            if delta == 0 {
+            if eliminations.len() == 0 {
                 break;
             }
-            answer += delta;
+            answer += eliminations.len();
             for (r, c) in eliminations {
                 rows[r][c] = false;
             }
         }
-        return answer;
+        return answer as i64;
     }
+}
+
+fn read_input(filename: &str) -> Vec<Vec<bool>> {
+    fs::read_to_string(filename)
+        .expect(format!("Should have been able to read {} as input file", filename).as_str())
+        .trim()
+        .split("\n")
+        .map(|v| v.chars().map(|v| v == '@').collect())
+        .collect()
 }
