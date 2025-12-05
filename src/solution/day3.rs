@@ -8,12 +8,10 @@ pub struct Part2;
 
 impl Solution for Part1 {
     fn solve(&self, filename: &str) -> i64 {
-        let banks = fs::read_to_string(filename)
-            .expect("Should have been able to read day1.txt as input file");
-        let banks = banks.trim().split("\n");
+        let banks = read_input(filename);
         let mut answer = 0;
         for bank in banks {
-            let bank: Vec<u32> = bank.chars().map(|c| c.to_digit(10).unwrap()).collect();
+            // largest digit for the tenth place in [0..n-1)
             let mut tenth = 0;
             for i in 0..(bank.len() - 1) {
                 if bank[i] > bank[tenth] {
@@ -21,6 +19,7 @@ impl Solution for Part1 {
                 }
             }
 
+            // largest digit for the ones place in [0..n)
             let mut ones = tenth + 1;
             for i in (tenth + 1)..bank.len() {
                 if bank[i] > bank[ones] {
@@ -30,7 +29,7 @@ impl Solution for Part1 {
 
             answer += bank[tenth] * 10 + bank[ones];
         }
-        return answer as i64;
+        answer as i64
     }
 }
 
@@ -46,11 +45,7 @@ impl Solution for Part2 {
      *          )                                   for all j < i
      */
     fn solve(&self, filename: &str) -> i64 {
-        // 200 lines of input
-        // 100 digits each
-        let banks = fs::read_to_string(filename)
-            .expect("Should have been able to read day1.txt as input file");
-        let banks = banks.trim().split("\n");
+        let banks = read_input(filename);
         let mut answer = 0;
         for bank in banks {
             let mut memo = vec![[0u64; 13]; bank.len()];
@@ -59,18 +54,38 @@ impl Solution for Part2 {
                     if (i + 1) < j {
                         continue;
                     } else if (i + 1) == j {
-                        memo[i][j] = bank[0..=i].parse::<u64>().unwrap();
+                        memo[i][j] = digits_to_u64(&bank[0..=i]);
                     } else {
-                        memo[i][j] = max(
-                            memo[i - 1][j],
-                            memo[i - 1][j - 1] * 10
-                                + bank.chars().nth(i).unwrap().to_digit(10).unwrap() as u64,
-                        );
+                        memo[i][j] = max(memo[i - 1][j], memo[i - 1][j - 1] * 10 + bank[i] as u64);
                     }
                 }
             }
             answer += memo[bank.len() - 1][12];
         }
-        return answer as i64;
+        answer as i64
     }
+}
+
+fn digits_to_u64(slice: &[u32]) -> u64 {
+    let mut answer: u64 = 0;
+    for v in slice {
+        answer = answer * 10 + *v as u64;
+    }
+    answer
+}
+
+fn read_input(filename: &str) -> Vec<Vec<u32>> {
+    fs::read_to_string(filename)
+        .expect(&*format!(
+            "Should have been able to read {} as input file",
+            filename
+        ))
+        .trim()
+        .split("\n")
+        .map(|v| {
+            v.chars()
+                .map(|c| c.to_digit(10).unwrap())
+                .collect::<Vec<u32>>()
+        })
+        .collect()
 }
