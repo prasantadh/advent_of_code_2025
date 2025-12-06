@@ -1,7 +1,7 @@
 pub mod solution;
 use paste::paste;
 
-use clap::{Parser, command};
+use clap::{Parser};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about=None)]
@@ -39,5 +39,5 @@ fn main() {
     let args = Args::parse();
     let solver = solution_factory(args.day, args.part);
     let filename = format!("data/day{}/sample{}.txt", args.day, args.sample);
-    println!("Answer: {}", solver.solve(&*filename));
+    println!("Answer: {}", solver.solve(&filename));
 }
