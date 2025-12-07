@@ -26,23 +26,43 @@ impl Solution for Part1 {
                 }
             }
         }
-
-        for line in manifold {
-            for item in line {
-                print!("{}", item);
-            }
-            println!();
-        }
-
         answer as i64
     }
 }
 
 impl Solution for Part2 {
     fn solve(&self, filename: &str) -> i64 {
+        /* Same as part 1 but now we add counter instead of just matching the beam */
         let mut manifold = read_input(filename);
-        let mut answer = 0;
-        answer as i64
+
+        let mut answers = vec![vec![0; manifold[0].len()]; manifold.len()];
+        for i in 0..manifold[0].len() {
+            answers[0][i] = (manifold[0][i] == Manifold::Start) as usize;
+        }
+
+        for i in 1..manifold.len() {
+            for j in 0..manifold[i].len() {
+                match manifold[i - 1][j] {
+                    Manifold::Start => {
+                        manifold[i][j] = Manifold::Beam;
+                        answers[i][j] = 1;
+                    }
+                    Manifold::Beam => {
+                        if manifold[i][j] == Manifold::Splitter {
+                            manifold[i][j - 1] = Manifold::Beam;
+                            manifold[i][j + 1] = Manifold::Beam;
+                            answers[i][j - 1] += answers[i - 1][j];
+                            answers[i][j + 1] += answers[i - 1][j];
+                        } else {
+                            manifold[i][j] = Manifold::Beam;
+                            answers[i][j] += answers[i - 1][j];
+                        }
+                    }
+                    _ => (),
+                }
+            }
+        }
+        answers.last().unwrap().iter().sum::<usize>() as i64
     }
 }
 
