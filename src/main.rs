@@ -1,7 +1,7 @@
 pub mod solution;
 use paste::paste;
 
-use clap::{Parser};
+use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about=None)]
