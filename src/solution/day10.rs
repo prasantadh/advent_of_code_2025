@@ -1,6 +1,8 @@
-use std::fs;
-
 use crate::Solution;
+
+use std::cmp::min;
+use std::fs;
+use z3::{Solver, ast::Int};
 
 pub struct Part1;
 pub struct Part2;
@@ -36,8 +38,38 @@ impl Solution for Part1 {
 }
 
 impl Solution for Part2 {
-    fn solve(&self, _filename: &str) -> i64 {
-        todo!()
+    fn solve(&self, filename: &str) -> i64 {
+        // takes about a couple minutes to solve it
+        let machines = read_input(filename);
+        let mut answer = 0;
+        for (num, machine) in machines.iter().enumerate() {
+            // solve for joltage using the linear equations
+            let solver = Solver::new();
+            let variables: Vec<Int> = (0..machine.buttons.len())
+                .map(|i| Int::fresh_const(&format!("x{}", i)))
+                .collect();
+            for variable in &variables {
+                solver.assert(variable.ge(0));
+            }
+            for (pos, joltage) in machine.joltage.iter().enumerate() {
+                let mut expr = Int::from_u64(0);
+                for (i, button) in machine.buttons.iter().enumerate() {
+                    if button.contains(&pos) {
+                        expr += &variables[i];
+                    }
+                }
+                solver.assert((expr).eq(*joltage as u64));
+            }
+            let mut local = 100000;
+            for solution in solver.solutions(variables, false).take(10000) {
+                local = min(
+                    local,
+                    solution.iter().map(|v| (*v).as_i64().unwrap()).sum::<i64>(),
+                );
+            }
+            answer += local;
+        }
+        answer
     }
 }
 
