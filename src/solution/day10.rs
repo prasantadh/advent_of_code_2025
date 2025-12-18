@@ -42,7 +42,7 @@ impl Solution for Part2 {
         // takes about a couple minutes to solve it
         let machines = read_input(filename);
         let mut answer = 0;
-        for (num, machine) in machines.iter().enumerate() {
+        for machine in machines {
             // solve for joltage using the linear equations
             let solver = Solver::new();
             let variables: Vec<Int> = (0..machine.buttons.len())
